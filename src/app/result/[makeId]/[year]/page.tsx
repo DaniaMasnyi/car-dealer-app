@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { fetchVehicleModels, VehicleModel } from '@/utils/api';
 
 export default function ResultPage({
-  params,
+  params: paramsPromise,
 }: {
-  params: { makeId: string; year: string };
+  params: Promise<{ makeId: string; year: string }>;
 }) {
-  const { makeId, year } = params;
+  const [params, setParams] = useState<{ makeId: string; year: string } | null>(
+    null
+  );
   const [models, setModels] = useState<VehicleModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,13 @@ export default function ResultPage({
   useEffect(() => {
     (async () => {
       try {
-        const fetchedModels = await fetchVehicleModels(makeId, year);
+        const resolvedParams = await paramsPromise;
+        setParams(resolvedParams);
+
+        const fetchedModels = await fetchVehicleModels(
+          resolvedParams.makeId,
+          resolvedParams.year
+        );
         setModels(fetchedModels);
         setError(null);
       } catch (error) {
@@ -29,7 +37,15 @@ export default function ResultPage({
         setIsLoading(false);
       }
     })();
-  }, [makeId, year]);
+  }, [paramsPromise]);
+
+  if (!params) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-xl font-semibold">Resolving parameters...</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -60,7 +76,7 @@ export default function ResultPage({
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">
-        Vehicle Models for Make ID {makeId} in Year {year}
+        Vehicle Models for Make ID {params.makeId} in Year {params.year}
       </h1>
       <ul className="list-disc pl-6">
         {models.map((model) => (
