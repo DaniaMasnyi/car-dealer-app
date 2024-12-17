@@ -18,7 +18,7 @@ export default function ResultPage({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchVehicleModels = async () => {
+    (async () => {
       try {
         setIsLoading(true);
         const response = await fetch(
@@ -32,9 +32,7 @@ export default function ResultPage({
       } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchVehicleModels();
+    })();
   }, [makeId, year]);
 
   if (isLoading) {
