@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchVehicleModels, VehicleModel } from '@/utils/api';
 
@@ -9,18 +9,69 @@ interface Params {
   year: string;
 }
 
+function ModelsList({ makeId, year }: { makeId: string; year: string }) {
+  const [models, setModels] = React.useState<VehicleModel[]>([]);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const fetchedModels = await fetchVehicleModels(makeId, year);
+
+        const uniqueModels = fetchedModels.filter(
+          (model, index, self) =>
+            index === self.findIndex((m) => m.Model_ID === model.Model_ID)
+        );
+
+        setModels(uniqueModels);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred.');
+        }
+      }
+    })();
+  }, [makeId, year]);
+
+  if (error) {
+    return (
+      <p className="text-xl text-red-500">
+        {error}. Please go back and try again.
+      </p>
+    );
+  }
+
+  if (!models.length) {
+    return (
+      <p className="text-lg font-semibold">
+        Unfortunately, no vehicle models were found for the selected make and
+        year.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="list-disc pl-6 space-y-2 max-w-lg text-left">
+      {models.map((model) => (
+        <li key={model.Model_ID} className="text-lg">
+          {model.Model_Name}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function ResultPage({
   params: paramsPromise,
 }: {
   params: Promise<Params>;
 }) {
   const [params, setParams] = useState<Params | null>(null);
-  const [models, setModels] = useState<VehicleModel[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
+  React.useEffect(() => {
     (async () => {
       try {
         const resolvedParams = await paramsPromise;
@@ -29,44 +80,15 @@ export default function ResultPage({
           return;
         }
         setParams(resolvedParams);
-
-        const fetchedModels = await fetchVehicleModels(
-          resolvedParams.makeId,
-          resolvedParams.year
-        );
-
-        const uniqueModels = fetchedModels.filter(
-          (model, index, self) =>
-            index === self.findIndex((m) => m.Model_ID === model.Model_ID)
-        );
-
-        setModels(uniqueModels);
-        setError(null);
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred.');
-        }
-      } finally {
-        setIsLoading(false);
+        setError('Invalid parameters provided.');
       }
     })();
   }, [paramsPromise]);
 
-  if (!params && isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-purple-600 to-blue-500">
-        <p className="text-xl font-semibold text-white">
-          Resolving parameters...
-        </p>
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-purple-600 to-blue-500">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-600 to-blue-500">
         <p className="text-xl text-red-500">{error}</p>
         <button
           onClick={() => router.push('/')}
@@ -78,43 +100,32 @@ export default function ResultPage({
     );
   }
 
-  if (!isLoading && models.length === 0) {
+  if (!params) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-purple-600 to-blue-500">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-600 to-blue-500">
         <p className="text-xl font-semibold text-white">
-          Unfortunately, no vehicle models were found for the selected make and
-          year.
+          Resolving parameters...
         </p>
-        <button
-          onClick={() => router.push('/')}
-          className="mt-6 px-4 py-2 bg-white text-purple-600 rounded hover:bg-gray-100"
-        >
-          Go Back
-        </button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-purple-600 to-blue-500 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-600 to-blue-500 text-white">
       <h1 className="text-3xl font-bold mb-6">
         Available Models for Selected Make and Year
       </h1>
       <p className="text-lg mb-4">
         Below is the list of available vehicle models for Make ID{' '}
-        <strong>{params?.makeId}</strong> and Year{' '}
-        <strong>{params?.year}</strong>:
+        <strong>{params.makeId}</strong> and Year <strong>{params.year}</strong>
+        :
       </p>
-      <ul className="list-disc pl-6 space-y-2 max-w-lg text-left">
-        {models.map((model, index) => (
-          <li key={`${model.Model_ID}-${index}`} className="text-lg">
-            {model.Model_Name}
-          </li>
-        ))}
-      </ul>
+      <Suspense fallback={<p className="text-lg">Loading models...</p>}>
+        <ModelsList makeId={params.makeId} year={params.year} />
+      </Suspense>
       <button
         onClick={() => router.push('/')}
-        className="mt-6 px-4 py-2 bg-white text-purple-600 rounded hover:bg-gray-100"
+        className="mt-6 mb-10 px-4 py-2 bg-white text-purple-600 rounded hover:bg-gray-100"
       >
         Go Back
       </button>
