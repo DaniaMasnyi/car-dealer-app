@@ -1,11 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-
-interface VehicleModel {
-  Model_ID: string;
-  Model_Name: string;
-}
+import { fetchVehicleModels, VehicleModel } from '@/utils/api';
 
 export default function ResultPage({
   params,
@@ -20,15 +16,15 @@ export default function ResultPage({
   useEffect(() => {
     (async () => {
       try {
-        setIsLoading(true);
-        const response = await fetch(
-          `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeIdYear/makeId/${makeId}/modelyear/${year}?format=json`
-        );
-        const data = await response.json();
-        setModels(data.Results as VehicleModel[]);
+        const fetchedModels = await fetchVehicleModels(makeId, year);
+        setModels(fetchedModels);
         setError(null);
       } catch (error) {
-        setError('Failed to fetch vehicle models. Please try again later.');
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('An unknown error occurred.');
+        }
       } finally {
         setIsLoading(false);
       }

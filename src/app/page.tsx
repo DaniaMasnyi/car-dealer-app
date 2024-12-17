@@ -1,12 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-interface Make {
-  MakeId: string;
-  MakeName: string;
-}
+import { fetchMakes, Make } from '@/utils/api';
 
 export default function HomePage() {
   const [makes, setMakes] = useState<Make[]>([]);
@@ -17,13 +13,14 @@ export default function HomePage() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch(
-          'https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json'
-        );
-        const data = await response.json();
-        setMakes(data.Results as Make[]);
+        const fetchedMakes = await fetchMakes();
+        setMakes(fetchedMakes);
       } catch (error) {
-        console.error('Error fetching vehicle makes:', error);
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error('An unknown error occurred.');
+        }
       }
     })();
   }, []);
