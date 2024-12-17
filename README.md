@@ -55,11 +55,11 @@ Ensure you have the following installed on your system:
 
 3.	Install dependencies:
 
-    npm install
-    # or
-    yarn install
-    # or
-    pnpm install
+    # npm install
+    or
+    # yarn install
+    or
+    # pnpm install
 
 4.	Run the development server:
 
