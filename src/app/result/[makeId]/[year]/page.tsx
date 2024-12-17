@@ -80,7 +80,7 @@ export default function ResultPage({
           return;
         }
         setParams(resolvedParams);
-      } catch (err) {
+      } catch {
         setError('Invalid parameters provided.');
       }
     })();
