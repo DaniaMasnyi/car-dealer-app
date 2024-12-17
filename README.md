@@ -63,51 +63,35 @@ Ensure you have the following installed on your system:
 
 4.	Run the development server:
 
-    npm run dev
-    # or
-    yarn dev
-    # or
-    pnpm dev
+   # npm run dev
+    or
+   # yarn dev
+    or
+   # pnpm dev
 
 5.	Open http://localhost:3000 in your browser to see the app in action.
-
-car-dealer-app/
-├── public/                # Static files (e.g., images, favicon)
-├── src/
-│   ├── app/
-│   │   ├── page.tsx       # Home page
-│   │   ├── result/        # Result page with dynamic routes
-│   │   │   ├── [makeId]/[year]/page.tsx
-│   ├── utils/
-│   │   ├── api.ts         # API helper functions for fetching data
-│   ├── styles/            # Global and Tailwind styles
-├── screenshots/           # Screenshots for documentation
-├── .eslintrc.js           # ESLint configuration
-├── .prettierrc            # Prettier configuration
-├── README.md              # Project documentation
-├── package.json           # Project dependencies and scripts
 
 API Documentation
 
 This app uses the Vehicle Product Information Catalog (VPIC) API to fetch vehicle data.
 
 Endpoints:
-	1.	Get vehicle makes:
-	•	URL: https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json
-	•	Description: Fetches a list of all vehicle manufacturers for cars.
-	2.	Get vehicle models by make and year:
-	•	URL: https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeIdYear/makeId/{makeId}/modelyear/{year}?format=json
-	•	Description: Fetches a list of models for a specific make ID and year.
+1.	Get vehicle makes:
+•	URL: https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json
+•	Description: Fetches a list of all vehicle manufacturers for cars.
+2.	Get vehicle models by make and year:
+•	URL: https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeIdYear/makeId/{makeId}/modelyear/{year}?format=json
+•	Description: Fetches a list of models for a specific make ID and year.
 
 API Helper Functions:
-	•	Located in src/utils/api.ts
-	•	Functions:
-	•	fetchMakes: Fetches vehicle manufacturers.
-	•	fetchVehicleModels: Fetches models for a given make and year
+•	Located in src/utils/api.ts
+•	Functions:
+•	fetchMakes: Fetches vehicle manufacturers.
+•	fetchVehicleModels: Fetches models for a given make and year
 
 Learn More
 
 To learn more about the technologies used in this project, check out the following resources:
-	•	Next.js Documentation: https://nextjs.org/docs
-	•	Tailwind CSS Documentation: https://tailwindcss.com/docs
-	•	VPIC API Documentation: https://vpic.nhtsa.dot.gov/api/
+•	Next.js Documentation: https://nextjs.org/docs
+•	Tailwind CSS Documentation: https://tailwindcss.com/docs
+•	VPIC API Documentation: https://vpic.nhtsa.dot.gov/api/
